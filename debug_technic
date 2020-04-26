@@ -1,0 +1,15 @@
+gcc -g -O0 a.out
+gdb -q a.out (-qはコピーライト非表示)
+
+<C言語の本当の実行順序>
+_start --> __libc_start_main --> main
+
+<break>
+break mainとか，
+break *0x12345678とか．
+delete breakpoints で削除．
+
+_startがエントリーポイント(スタートアップ処理)．readelfとかで表示されるエントリーポイントはここ．
+
+layout asm //アセンブラ表記
+
