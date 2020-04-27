@@ -33,8 +33,6 @@ Device::Device(const char *path):Endian(LE){
 Device::~Device(void){
 };
 
-uint8_t* Device::dc;
-
 int Device::Fsize(void){
 	return fsize;
 };

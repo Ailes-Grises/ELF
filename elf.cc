@@ -5,9 +5,6 @@
 #include"elf.h"
 
 Elf::Elf(void){
-};
-
-Elf::Elf(const char *path):Device(path){
 	memset(&ehdr, 0, sizeof(ehdr));
 };
 
@@ -69,7 +66,7 @@ uint16_t Elf::E_shstrndx(void){
 	return ehdr.e_shstrndx;
 }
 
-void Elf::eh_parser(Elf &obj){
+void Elf::eh_parser(Device &obj){
 	for(int i=0;i<EI_NIDENT;i++) ehdr.e_ident[i]=obj.get8bit(obj);
 
 	ehdr.e_type=obj.get16bit(obj);
@@ -87,7 +84,7 @@ void Elf::eh_parser(Elf &obj){
 	ehdr.e_shstrndx=obj.get16bit(obj);
 };
 
-void Elf::showehdr(Elf &obj){
+void Elf::showehdr(void){
 	std::cout<<"ELF Header:"<<std::endl;
 
 	/* e_ident[EI_NIDENT] */

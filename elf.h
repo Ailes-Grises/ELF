@@ -9,13 +9,12 @@
 #include<elf.h>
 #include"device.h"
 
-class Elf : public Device{
+class Elf{
 	private:
 	//int bit; // CPUのビット数．めんどくさい．
 	Elf64_Ehdr ehdr;
 	public:
 	Elf(void);
-	Elf(const char *path); //コイツはあくまでファイルアクセスと配列ダンプ．
 	~Elf(void);
 
 	// 各構造体メンバの読み出し関数(ただし64bit版しか実装していない．)
@@ -34,8 +33,8 @@ class Elf : public Device{
 	uint16_t E_shnum(void);
 	uint16_t E_shstrndx(void);
 
-	void eh_parser(Elf &obj);
-	void showehdr(Elf &obj);
+	void eh_parser(Device &obj);
+	void showehdr(void);
 };
 
 class Section{
@@ -45,7 +44,7 @@ class Section{
 	Section(void);
 	Section(Elf &eh); // 動的領域確保
 	~Section(void);
-	void sh_parser(Elf &eh, Section &sh); // こうすればElfクラスのデータにもアクセスし放題．ただし，当然だがElfクラスのプライベートメンバにアクセスするときには，専用の読み出し関数を介さなければならない．
+	void sh_parser(Device &bd, Elf &eh, Section &sh); // こうすればElfクラスのデータにもアクセスし放題．ただし，当然だがElfクラスのプライベートメンバにアクセスするときには，専用の読み出し関数を介さなければならない．
 	void showshdr(Elf &eh, Section &sh);
 	// もし他のクラスからこのクラスの構造体型配列shdrの各メンバにアクセスしたいのならば，Elfクラスのように，各メンバへのアクセス関数を作成する必要がある．
 };

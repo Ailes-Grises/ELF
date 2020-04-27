@@ -17,7 +17,7 @@ class Device{
 	private:
 	uint8_t *data; // バイナリデータを格納．
 	int fsize;
-	static uint8_t *dc; //data[]上のデータカウンタ． *data に直接アクセスしないほうが良い． このメンバは，他のクラス上から値を変更したい場合があるため，専用の関数を用意する(SetDC(Device &obj))．
+	uint8_t *dc; //data[]上のデータカウンタ． *data に直接アクセスしないほうが良い． このメンバは，他のクラス上から値を変更したい場合があるため，専用の関数を用意する(SetDC(Device &obj))．
 	int Endian; //エンディアンフラグ．まだ未定義．デフォルトでどっちかに設定しといたほうがいいかも．
 	public:
 	Device(void);
