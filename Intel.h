@@ -27,4 +27,4 @@
  * power management:
  */
 
-#define mov 0x01 //例．実際にはちゃんと調べましょう．
+// #define mov 0x01 // 例．実際にはちゃんと調べましょう．

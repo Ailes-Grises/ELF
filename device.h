@@ -39,9 +39,10 @@ class Device{
 	uint8_t getChar(Device &obj); // 内部で*spを使用．バイトオフセットは考慮されていない．
 };
 
-//std::string Hex_frombin(std::string &bin); // 2進数 -> 16進数
-//unsigned int Bin_fromhex(std::string &hex); // 16進数 -> 2進数
-//unsigned int Dec_frombin(std::string &bin); // 2進数 -> 10進数
-//unsigned int Bin_fromdec(unsigned int dec); // 10進数 -> 2進数
-//std::string Hex_fromdec(unsigned int dec); // 10進数 -> 16進数
-//unsigned int Dec_fromhex(std::string &hex); // 16進数 -> 10進数
+// デバッグ用の便利関数．
+unsigned int Dec_frombin(std::string &bin); // 2進数 -> 10進数
+std::string Bin_fromdec(unsigned int dec); // 10進数 -> 2進数
+std::string Hex_fromdec(unsigned int dec); // 10進数 -> 16進数
+unsigned int Dec_fromhex(std::string &hex); // 16進数 -> 10進数
+std::string Hex_frombin(std::string &bin); // 2進数 -> 16進数
+std::string  Bin_fromhex(std::string &hex); // 16進数 -> 2進数

@@ -1,9 +1,8 @@
 #include<iostream>
 #include<iomanip>
-#include<string.h>
+#include<string>
 #include<elf.h>
 #include"elf.h"
-#include<stdlib.h>
 
 Section::Section(void){
 };
@@ -53,10 +52,10 @@ void Section::getsh_name(Device &bd, Elf &eh, Section &sh, int Dec_addr, int sec
 };
 
 void Section::show_shdr(Device &bd, Elf &eh, Section &sh){
-	// fprintf(stderr, "sh.shdr[34].sh_size : %x\n", sh.shdr[34].sh_size); // for debug
 
+	std::cout<<"There are "<<eh.E_shnum()<<" section headers, starting at offset "<<"0x"<<hexformat(4)<<eh.E_shoff()<<":\n"<<std::endl;
 	std::cout<<"Section Header: "<<std::endl;
-	std::cout<<"  [number]  "<<setw_left(18)<<"Name"<<setw_left(18)<<"Type"<<setw_left(18)<<"Address"<<setw_left(18)<<"Offset"<<std::endl;;
+	std::cout<<"  [number]  "<<setw_left(18)<<"Name"<<setw_left(18)<<"Type"<<setw_left(18)<<"Address"<<setw_left(15)<<"Offset"<<std::endl;
 	std::cout<<"            "<<setw_left(18)<<"Size"<<setw_left(18)<<"EntSize"<<setw_left(18)<<"Flag  Link  Info  Alignment\n"<<std::endl;
 
 	for(int i=0;i<eh.E_shnum();i++){
@@ -112,22 +111,41 @@ void Section::show_shdr(Device &bd, Elf &eh, Section &sh){
 		std::cout<<"            "<<hexformat(16)<<sh.shdr[i].sh_size<<"  ";
 
 		/* Entsize */
-		std::cout<<"0x"<<hexformat(14)<<shdr[i].sh_entsize<<"  ";
+		std::cout<<"0x"<<hexformat(14)<<shdr[i].sh_entsize<<"    ";
 
 		/* Flags */
 		// sh_flagsの値は，/usr/include/elf.h で定義されているSHF_* の値(この値は2進数)の総和(合計11bitある)を16進数で表したものである．
 		// よって，sh_flagsの値を2進数に直し，1のフラグが立っている部分が権限である．
-		// ビット配列は，[CTGOLISMEAW]の順番になっている．
-		// ネットマスクと同じ要領で比較すれば良い．
+		// これを調べるには，SHF_* とsh_flagsの論理積(&)を取れば良い．
+		// /usr/include/elf.h にマクロで記述されている "(1 << 2)"などは，(0100)等のシフト演算表記なので，これ自体が数字である(命令ではない)．
+
+		std::string flags;
+
+		if((shdr[i].sh_flags & SHF_WRITE)==SHF_WRITE) flags+='W';
+		if((shdr[i].sh_flags & SHF_ALLOC)==SHF_ALLOC) flags+='A';
+		if((shdr[i].sh_flags & SHF_EXECINSTR)==SHF_EXECINSTR) flags+='X';
+		if((shdr[i].sh_flags & SHF_MERGE)==SHF_MERGE) flags+='M';
+		if((shdr[i].sh_flags & SHF_STRINGS)==SHF_STRINGS) flags+='S';
+		if((shdr[i].sh_flags & SHF_INFO_LINK)==SHF_INFO_LINK) flags+='I';
+		if((shdr[i].sh_flags & SHF_LINK_ORDER)==SHF_LINK_ORDER) flags+='L';
+		if((shdr[i].sh_flags & SHF_OS_NONCONFORMING)==SHF_OS_NONCONFORMING) flags+='O';
+		if((shdr[i].sh_flags & SHF_GROUP)==SHF_GROUP) flags+='G';
+		if((shdr[i].sh_flags & SHF_TLS)==SHF_TLS) flags+='T';
+		if((shdr[i].sh_flags & SHF_COMPRESSED)==SHF_COMPRESSED) flags+='C';
+		if((shdr[i].sh_flags & SHF_MASKOS)==SHF_MASKOS) flags+='o';
+		if((shdr[i].sh_flags & SHF_EXCLUDE)==SHF_EXCLUDE) flags+='E';
+		if((shdr[i].sh_flags & SHF_MASKPROC)==SHF_MASKPROC) flags+='p';
+
+		std::cout<<setw_left(4)<<flags;
 
 		/* Link */
+		std::cout<<setw_right(3)<<shdr[i].sh_link;
 
 		/* Info */
+		std::cout<<setw_right(6)<<shdr[i].sh_info;
 
 		/* Alignment */
-
-		std::cout<<"\n"<<std::endl;
-
+		std::cout<<"       "<<shdr[i].sh_addralign<<"\n"<<std::endl;
 	}
 
 	std::cout<<"Key to Flags:"<<std::endl;
