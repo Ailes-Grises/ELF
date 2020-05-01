@@ -20,13 +20,14 @@ Device::Device(const char *path):Endian(LE){
 	}
 	fstat(fd, &st);
 	fsize=st.st_size;
-	if((data=(uint8_t*)malloc(fsize*sizeof(uint8_t)))==NULL){
-		std::cerr<<"malloc failed. "<<std::endl;
+	if((data=new uint8_t[fsize])==NULL){
+		std::cerr<<"new failed. "<<std::endl;
 		exit(1);
 	}
 	read(fd, data, fsize);
 	dc=data;
-	//free()はしない．
+	sp=data;
+	// delete はしない．
 	close(fd);
 };
 
@@ -37,15 +38,29 @@ int Device::Fsize(void){
 	return fsize;
 };
 
-void Device::SetDC(Device &obj, int Dec_addr){
+void Device::setDC(Device &obj, int Dec_addr){
 	// 10進数のファイルオフセット(アドレス)を受け取り，*dc の値を変更する．
 	dc=data+Dec_addr*sizeof(uint8_t);
 	return;
-}
+};
 
-void Device::ShowDC(Device &obj){
+uint8_t* Device::getDC(Device &obj){
+	return dc;
+};
+
+uint8_t* Device::getDATA(Device &obj){
+	return data;
+};
+
+void Device::showDC(Device &obj){
 	std::cout<<"*dc : "<<hexformat(2)<<(unsigned int)*dc<<std::endl;
-}
+};
+
+void Device::setSP(Device &obj, int Dec_addr){
+	// 10進数のファイルオフセット(アドレス)を受け取り，*sp の値を変更する．
+	sp=data+Dec_addr*sizeof(uint8_t);
+	return;
+};
 
 uint8_t Device::get8bit(Device &obj){
 	uint8_t *temp=dc;
@@ -90,3 +105,10 @@ uint64_t Device::get64bit(Device &obj){
 	}
 };
 
+uint8_t Device::getChar(Device &obj){
+	uint8_t *temp=sp;
+	sp+=sizeof(uint8_t);
+	return *(temp);
+};
+
+// getShort() やgetLong() を作成する場合には，get16bit() などの構造がそのまま使えるはず．

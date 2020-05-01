@@ -7,9 +7,9 @@ int main(int argv, char *argc[]){
 
 	// コマンドライン引数によって，どのメタデータを表示するのかを判断するべき．
 	Ehdr.eh_parser(bd);
-	Ehdr.showehdr();
+	Ehdr.show_ehdr();
 	Section Shdr(Ehdr);
 	Shdr.sh_parser(bd, Ehdr, Shdr);
-	Shdr.showshdr(Ehdr, Shdr);
+	Shdr.show_shdr(bd, Ehdr, Shdr);
 	return 0;
 }

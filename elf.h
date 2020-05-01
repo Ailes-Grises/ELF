@@ -1,6 +1,8 @@
 #include<iostream>
 #include<iomanip>
 
+#define setw_left(wd) std::setw(wd)<<std::setfill(' ')<<std::left
+#define setw_right(wd) std::setw(wd)<<std::setfill(' ')<<std::right
 #define hexformat(wd) std::hex<<std::setfill('0')<<std::setw(wd)
 // uint8_t型は本来unsigned char なので，この関数を使ってuint8_t型の16進数を16進表示させるには，直前に(unsigned int)とかで整数型にキャストする必要がある．
 
@@ -34,19 +36,20 @@ class Elf{
 	uint16_t E_shstrndx(void);
 
 	void eh_parser(Device &obj);
-	void showehdr(void);
+	void show_ehdr(void);
 };
 
 class Section{
 	private:
 	Elf64_Shdr *shdr; // ポインタ表記にしておいて，コンストラクタでsizeof(Elf64_Shdr)*e_shnum だけ領域確保する．
+	std::string *sh_name; // 文字通りsh_nameを格納する文字列クラス型配列．
 	public:
 	Section(void);
 	Section(Elf &eh); // 動的領域確保
 	~Section(void);
 	void sh_parser(Device &bd, Elf &eh, Section &sh); // こうすればElfクラスのデータにもアクセスし放題．ただし，当然だがElfクラスのプライベートメンバにアクセスするときには，専用の読み出し関数を介さなければならない．
-	void showshdr(Elf &eh, Section &sh);
-	// もし他のクラスからこのクラスの構造体型配列shdrの各メンバにアクセスしたいのならば，Elfクラスのように，各メンバへのアクセス関数を作成する必要がある．
+	void show_shdr(Device &bd, Elf &eh, Section &sh);
+	void getsh_name(Device &bd, Elf &eh, Section &sh, int Dec_addr, int sec_num); // sh_nameの読み出し関数．当初は汎用性のある文字列読み出し関数を作成し，それをオーバーラップする予定だったが，よく考えたらこのクラスから他の文字列の読み出しを行うことが無い気がしたのでsh_nameの読み出し専用の関数にすることにした．
 };
 
 #endif

@@ -13,58 +13,59 @@ Elf::~Elf(void){
 
 unsigned char Elf::E_ident(int Nident){
 	return ehdr.e_ident[Nident];
-}
+};
 
 uint16_t Elf::E_type(void){
 	return ehdr.e_type;
-}
+};
 
 uint16_t Elf::E_machine(void){
 	return ehdr.e_machine;
-}
+};
 
 uint32_t Elf::E_version(void){
 	return ehdr.e_version;
-}
+};
+
 Elf64_Addr Elf::E_entry(void){
 	return ehdr.e_entry;
-}
+};
 
 Elf64_Off Elf::E_phoff(void){
 	return ehdr.e_phoff;
-}
+};
 
 Elf64_Off Elf::E_shoff(void){
 	return ehdr.e_shoff;
-}
+};
 
 uint32_t Elf::E_flags(void){
 	return ehdr.e_flags;
-}
+};
 
 uint16_t Elf::E_ehsize(void){
 	return ehdr.e_ehsize;
-}
+};
 
 uint16_t Elf::E_phentsize(void){
 	return ehdr.e_phentsize;
-}
+};
 
 uint16_t Elf::E_phnum(void){
 	return ehdr.e_phnum;
-}
+};
 
 uint16_t Elf::E_shentsize(void){
 	return ehdr.e_shentsize;
-}
+};
 
 uint16_t Elf::E_shnum(void){
 	return ehdr.e_shnum;
-}
+};
 
 uint16_t Elf::E_shstrndx(void){
 	return ehdr.e_shstrndx;
-}
+};
 
 void Elf::eh_parser(Device &obj){
 	for(int i=0;i<EI_NIDENT;i++) ehdr.e_ident[i]=obj.get8bit(obj);
@@ -84,7 +85,7 @@ void Elf::eh_parser(Device &obj){
 	ehdr.e_shstrndx=obj.get16bit(obj);
 };
 
-void Elf::showehdr(void){
+void Elf::show_ehdr(void){
 	std::cout<<"ELF Header:"<<std::endl;
 
 	/* e_ident[EI_NIDENT] */
