@@ -2,7 +2,7 @@
 #include<iomanip>
 #include<string>
 #include<elf.h>
-#include"elf.h"
+#include"elf64.h"
 
 Section::Section(void){
 };
@@ -35,6 +35,7 @@ void Section::sh_parser(Device &bd, Elf &eh, Section &sh){ // ここでElfクラ
 		sh.shdr[i].sh_entsize=bd.get64bit(bd);
 	}
 };
+
 void Section::getsh_name(Device &bd, Elf &eh, Section &sh, int Dec_addr, int sec_num){
 	// 目的の位置(Dec_addr)までジャンプし，データを読んで(getDATA)，sh_name[sec_num]に格納する．
 	// int Dec_addr は該当データのバイトオフセット．
@@ -54,6 +55,7 @@ void Section::getsh_name(Device &bd, Elf &eh, Section &sh, int Dec_addr, int sec
 void Section::show_shdr(Device &bd, Elf &eh, Section &sh){
 
 	std::cout<<"There are "<<eh.E_shnum()<<" section headers, starting at offset "<<"0x"<<hexformat(4)<<eh.E_shoff()<<":\n"<<std::endl;
+
 	std::cout<<"Section Header: "<<std::endl;
 	std::cout<<"  [number]  "<<setw_left(18)<<"Name"<<setw_left(18)<<"Type"<<setw_left(18)<<"Address"<<setw_left(15)<<"Offset"<<std::endl;
 	std::cout<<"            "<<setw_left(18)<<"Size"<<setw_left(18)<<"EntSize"<<setw_left(18)<<"Flag  Link  Info  Alignment\n"<<std::endl;
@@ -67,38 +69,39 @@ void Section::show_shdr(Device &bd, Elf &eh, Section &sh){
 		std::cout<<"   [ "<<std::dec<<setw_right(2)<<i<<" ]   "<<setw_left(19)<<sh_name[i]; // std::setwの使用なのか，何故か末尾に謎の文字が入ってしまうため，これを考慮して19としている．
 
 		/* Type */
-		if(sh.shdr[i].sh_type==SHT_PROGBITS){
-			std::cout<<setw_left(18)<<"PROGBITS";
-		}else if(sh.shdr[i].sh_type==SHT_SYMTAB){
-			std::cout<<setw_left(18)<<"SYMTAB";
-		}else if(sh.shdr[i].sh_type==SHT_STRTAB){
-			std::cout<<setw_left(18)<<"STRTAB";
-		}else if(sh.shdr[i].sh_type==SHT_RELA){
-			std::cout<<setw_left(18)<<"RELA";
-		}else if(sh.shdr[i].sh_type==SHT_HASH){
-			std::cout<<setw_left(18)<<"HASH";
-		}else if(sh.shdr[i].sh_type==SHT_DYNAMIC){
-			std::cout<<setw_left(18)<<"DYNAMIC";
-		}else if(sh.shdr[i].sh_type==SHT_NOTE){
-			std::cout<<setw_left(18)<<"NOTE";
-		}else if(sh.shdr[i].sh_type==SHT_NOBITS){
-			std::cout<<setw_left(18)<<"NOBITS";
-		}else if(sh.shdr[i].sh_type==SHT_REL){
-			std::cout<<setw_left(18)<<"REL";
-		}else if(sh.shdr[i].sh_type==SHT_SHLIB){
-			std::cout<<setw_left(18)<<"SHLIB";
-		}else if(sh.shdr[i].sh_type==SHT_DYNSYM){
-			std::cout<<setw_left(18)<<"DYNSYM";
-		}else if(sh.shdr[i].sh_type==SHT_LOPROC){
-			std::cout<<setw_left(18)<<"LOPROC";
-		}else if(sh.shdr[i].sh_type==SHT_HIPROC){
-			std::cout<<setw_left(18)<<"HIPROC";
-		}else if(sh.shdr[i].sh_type==SHT_LOUSER){
-			std::cout<<setw_left(18)<<"LOUSER";
-		}else if(sh.shdr[i].sh_type==SHT_HIUSER){
-			std::cout<<setw_left(18)<<"HIUSER";
-		}else{
-			std::cout<<setw_left(18)<<"NULL";
+		switch(sh.shdr[i].sh_type){
+			case SHT_PROGBITS:
+				std::cout<<setw_left(18)<<"PROGBITS"; break;
+			case SHT_SYMTAB:
+				std::cout<<setw_left(18)<<"SYMTAB"; break;
+			case SHT_STRTAB:
+				std::cout<<setw_left(18)<<"STRTAB"; break;
+			case SHT_RELA:
+				std::cout<<setw_left(18)<<"RELA"; break;
+			case SHT_HASH:
+				std::cout<<setw_left(18)<<"HASH"; break;
+			case SHT_DYNAMIC:
+				std::cout<<setw_left(18)<<"DYNAMIC"; break;
+			case SHT_NOTE:
+				std::cout<<setw_left(18)<<"NOTE"; break;
+			case SHT_NOBITS:
+				std::cout<<setw_left(18)<<"NOBITS"; break;
+			case SHT_REL:
+				std::cout<<setw_left(18)<<"REL"; break;
+			case SHT_SHLIB:
+				std::cout<<setw_left(18)<<"SHLIB"; break;
+			case SHT_DYNSYM:
+				std::cout<<setw_left(18)<<"DYNSYM"; break;
+			case SHT_LOPROC:
+				std::cout<<setw_left(18)<<"LOPROC"; break;
+			case SHT_HIPROC:
+				std::cout<<setw_left(18)<<"HIPROC"; break;
+			case SHT_LOUSER:
+				std::cout<<setw_left(18)<<"LOUSER"; break;
+			case SHT_HIUSER:
+				std::cout<<setw_left(18)<<"HIUSER"; break;
+			default:
+				std::cout<<setw_left(18)<<"NULL"; break;
 		}
 
 		/* Address */
@@ -152,7 +155,7 @@ void Section::show_shdr(Device &bd, Elf &eh, Section &sh){
 	std::cout<<"  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),"<<std::endl;
 	std::cout<<"  L (link order), O (extra OS processing required), G (group), T (TLS),"<<std::endl;
 	std::cout<<"  C (compressed), x (unknown), o (OS specific), E (exclude),"<<std::endl;
-	std::cout<<"  l (large), p (processor specific)"<<std::endl;
+	std::cout<<"  l (large), p (processor specific)\n\n"<<std::endl;
 
 	return;
 };

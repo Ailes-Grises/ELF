@@ -13,13 +13,12 @@
 
 class Elf{
 	private:
-	//int bit; // CPUのビット数．めんどくさい．
 	Elf64_Ehdr ehdr;
 	public:
 	Elf(void);
 	~Elf(void);
 
-	// 各構造体メンバの読み出し関数(ただし64bit版しか実装していない．)
+	// 各構造体メンバの読み出し関数
 	unsigned char E_ident(int Nident);
 	uint16_t E_type(void);
 	uint16_t E_machine(void);
@@ -50,6 +49,17 @@ class Section{
 	void sh_parser(Device &bd, Elf &eh, Section &sh); // こうすればElfクラスのデータにもアクセスし放題．ただし，当然だがElfクラスのプライベートメンバにアクセスするときには，専用の読み出し関数を介さなければならない．
 	void show_shdr(Device &bd, Elf &eh, Section &sh);
 	void getsh_name(Device &bd, Elf &eh, Section &sh, int Dec_addr, int sec_num); // sh_nameの読み出し関数．当初は汎用性のある文字列読み出し関数を作成し，それをオーバーラップする予定だったが，よく考えたらこのクラスから他の文字列の読み出しを行うことが無い気がしたのでsh_nameの読み出し専用の関数にすることにした．
+};
+
+class Program{
+	private:
+	Elf64_Phdr *phdr;
+	public:
+	Program(void);
+	Program(Elf &eh);
+	~Program(void);
+	void ph_parser(Device &bd, Elf &eh, Program &ph);
+	void show_phdr(Device &bd, Elf &eh, Program &ph);
 };
 
 #endif

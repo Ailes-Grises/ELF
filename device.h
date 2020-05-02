@@ -3,7 +3,6 @@
 #include<iomanip>
 #include<string>
 
-#define EHDR 64
 #define LE 0 // リトルエンディアン
 #define BE 1 // ビッグエンディアン
 
