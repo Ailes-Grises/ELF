@@ -1,20 +1,30 @@
 #include<iostream>
+#include<unistd.h>
 #include"elf64.h"
 
-int main(int argv, char *argc[]){
+int main(int argc, char *argv[]){
 	Device bd("./sampleO0.out"); // ちゃんとファイル名を指定しましょう
-	Elf Ehdr;
+	// 必ずElfクラスのインスタンスから定義すること．順番間違えるとエラーになる．
+	Elf Ehdr(bd);
+	Section Shdr(bd, Ehdr);
+	Program Phdr(bd, Ehdr);
 
-	// コマンドライン引数によって，どのメタデータを表示するのかを判断するべき．
-	Ehdr.eh_parser(bd);
-	Ehdr.show_ehdr();
 
-	Section Shdr(Ehdr);
-	Shdr.sh_parser(bd, Ehdr, Shdr);
-	//Shdr.show_shdr(bd, Ehdr, Shdr);
+	int opt;
+	while((opt=getopt(argc, argv, "hlS"))!=-1){
+		switch(opt){
+			case 'h':
+	Ehdr.show_ehdr(); break;
+			case 'l':
+	Shdr.show_shdr(bd, Ehdr); break;
+			case 'S':
+	Phdr.show_phdr(bd, Ehdr); break;
+			default:
+				std::cerr<<"Please type option: \n"<<std::endl;
+				std::cerr<<"  -h : show ELF header\n  -l : show program header\n  -S : show Section header\n"<<std::endl;
+				break;
+		}
+	}
 
-	Program Phdr(Ehdr);
-	Phdr.ph_parser(bd, Ehdr, Phdr);
-	//Phdr.show_phdr(bd, Ehdr, Phdr);
 	return 0;
 }

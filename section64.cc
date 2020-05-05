@@ -7,15 +7,16 @@
 Section::Section(void){
 };
 
-Section::Section(Elf &eh){
+Section::Section(Device &bd, Elf &eh){
 	shdr=new Elf64_Shdr[eh.E_shnum()];
 	sh_name=new std::string[eh.E_shnum()]; // sh_name格納用のデータ領域を確保．
+	this->sh_parser(bd, eh); // ここでパーサを呼び出す
 };
 
 Section::~Section(void){
 };
 
-void Section::sh_parser(Device &bd, Elf &eh, Section &sh){ // ここでElfクラスの情報が必要なので，クラスの参照をコンストラクタの引数として受け取っている．
+void Section::sh_parser(Device &bd, Elf &eh){ // ここでElfクラスの情報が必要なので，クラスの参照をコンストラクタの引数として受け取っている．
 
 	// Device クラスのデータカウンタdcの位置をeh.e_shoff に移動する．
 	bd.setDC(bd, eh.E_shoff()); 
@@ -23,20 +24,20 @@ void Section::sh_parser(Device &bd, Elf &eh, Section &sh){ // ここでElfクラ
 
 	for(int i=0;i<eh.E_shnum();i++){
 		// 仕様書に従って構造体へダンプ
-		sh.shdr[i].sh_name=bd.get32bit(bd);
-		sh.shdr[i].sh_type=bd.get32bit(bd);
-		sh.shdr[i].sh_flags=bd.get64bit(bd);
-		sh.shdr[i].sh_addr=bd.get64bit(bd);
-		sh.shdr[i].sh_offset=bd.get64bit(bd);
-		sh.shdr[i].sh_size=bd.get64bit(bd);
-		sh.shdr[i].sh_link=bd.get32bit(bd);
-		sh.shdr[i].sh_info=bd.get32bit(bd);
-		sh.shdr[i].sh_addralign=bd.get64bit(bd);
-		sh.shdr[i].sh_entsize=bd.get64bit(bd);
+		shdr[i].sh_name=bd.get32bit(bd);
+		shdr[i].sh_type=bd.get32bit(bd);
+		shdr[i].sh_flags=bd.get64bit(bd);
+		shdr[i].sh_addr=bd.get64bit(bd);
+		shdr[i].sh_offset=bd.get64bit(bd);
+		shdr[i].sh_size=bd.get64bit(bd);
+		shdr[i].sh_link=bd.get32bit(bd);
+		shdr[i].sh_info=bd.get32bit(bd);
+		shdr[i].sh_addralign=bd.get64bit(bd);
+		shdr[i].sh_entsize=bd.get64bit(bd);
 	}
 };
 
-void Section::getsh_name(Device &bd, Elf &eh, Section &sh, int Dec_addr, int sec_num){
+void Section::getsh_name(Device &bd, Elf &eh, int Dec_addr, int sec_num){
 	// 目的の位置(Dec_addr)までジャンプし，データを読んで(getDATA)，sh_name[sec_num]に格納する．
 	// int Dec_addr は該当データのバイトオフセット．
 
@@ -52,7 +53,7 @@ void Section::getsh_name(Device &bd, Elf &eh, Section &sh, int Dec_addr, int sec
 	return;
 };
 
-void Section::show_shdr(Device &bd, Elf &eh, Section &sh){
+void Section::show_shdr(Device &bd, Elf &eh){
 
 	std::cout<<"There are "<<eh.E_shnum()<<" section headers, starting at offset "<<"0x"<<hexformat(4)<<eh.E_shoff()<<":\n"<<std::endl;
 
@@ -62,14 +63,14 @@ void Section::show_shdr(Device &bd, Elf &eh, Section &sh){
 
 	for(int i=0;i<eh.E_shnum();i++){
 		// セクション名取得
-		sh.getsh_name(bd, eh, sh, shdr[eh.E_shstrndx()].sh_offset+shdr[i].sh_name, i);
+		this->getsh_name(bd, eh, shdr[eh.E_shstrndx()].sh_offset+shdr[i].sh_name, i);
 		// 仕組みとしては，.shstrtab セクションのバイトオフセットから，各セクションの名前が格納されている場所のバイトオフセットであるshdr[i].sh_nameの位置を指定している．
 
 		/* Name */
 		std::cout<<"   [ "<<std::dec<<setw_right(2)<<i<<" ]   "<<setw_left(19)<<sh_name[i]; // std::setwの使用なのか，何故か末尾に謎の文字が入ってしまうため，これを考慮して19としている．
 
 		/* Type */
-		switch(sh.shdr[i].sh_type){
+		switch(shdr[i].sh_type){
 			case SHT_PROGBITS:
 				std::cout<<setw_left(18)<<"PROGBITS"; break;
 			case SHT_SYMTAB:
@@ -105,13 +106,13 @@ void Section::show_shdr(Device &bd, Elf &eh, Section &sh){
 		}
 
 		/* Address */
-		std::cout<<"0x"<<std::right<<hexformat(14)<<sh.shdr[i].sh_addr<<"  ";
+		std::cout<<"0x"<<std::right<<hexformat(14)<<shdr[i].sh_addr<<"  ";
 
 		/* Offset */
-		std::cout<<"0x"<<std::right<<hexformat(8)<<sh.shdr[i].sh_offset<<std::endl;
+		std::cout<<"0x"<<std::right<<hexformat(8)<<shdr[i].sh_offset<<std::endl;
 
 		/* Size */
-		std::cout<<"            "<<hexformat(16)<<sh.shdr[i].sh_size<<"  ";
+		std::cout<<"            "<<hexformat(16)<<shdr[i].sh_size<<"  ";
 
 		/* Entsize */
 		std::cout<<"0x"<<hexformat(14)<<shdr[i].sh_entsize<<"    ";

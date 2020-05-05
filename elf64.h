@@ -16,6 +16,7 @@ class Elf{
 	Elf64_Ehdr ehdr;
 	public:
 	Elf(void);
+	Elf(Device &bd);
 	~Elf(void);
 
 	// 各構造体メンバの読み出し関数
@@ -44,11 +45,11 @@ class Section{
 	std::string *sh_name; // 文字通りsh_nameを格納する文字列クラス型配列．
 	public:
 	Section(void);
-	Section(Elf &eh); // 動的領域確保
+	Section(Device &bd, Elf &eh); // 動的領域確保
 	~Section(void);
-	void sh_parser(Device &bd, Elf &eh, Section &sh); // こうすればElfクラスのデータにもアクセスし放題．ただし，当然だがElfクラスのプライベートメンバにアクセスするときには，専用の読み出し関数を介さなければならない．
-	void show_shdr(Device &bd, Elf &eh, Section &sh);
-	void getsh_name(Device &bd, Elf &eh, Section &sh, int Dec_addr, int sec_num); // sh_nameの読み出し関数．当初は汎用性のある文字列読み出し関数を作成し，それをオーバーラップする予定だったが，よく考えたらこのクラスから他の文字列の読み出しを行うことが無い気がしたのでsh_nameの読み出し専用の関数にすることにした．
+	void sh_parser(Device &bd, Elf &eh); // こうすればElfクラスのデータにもアクセスし放題．ただし，当然だがElfクラスのプライベートメンバにアクセスするときには，専用の読み出し関数を介さなければならない．
+	void show_shdr(Device &bd, Elf &eh);
+	void getsh_name(Device &bd, Elf &eh, int Dec_addr, int sec_num); // sh_nameの読み出し関数．当初は汎用性のある文字列読み出し関数を作成し，それをオーバーラップする予定だったが，よく考えたらこのクラスから他の文字列の読み出しを行うことが無い気がしたのでsh_nameの読み出し専用の関数にすることにした．
 };
 
 class Program{
@@ -56,10 +57,10 @@ class Program{
 	Elf64_Phdr *phdr;
 	public:
 	Program(void);
-	Program(Elf &eh);
+	Program(Device &bd, Elf &eh);
 	~Program(void);
-	void ph_parser(Device &bd, Elf &eh, Program &ph);
-	void show_phdr(Device &bd, Elf &eh, Program &ph);
+	void ph_parser(Device &bd, Elf &eh);
+	void show_phdr(Device &bd, Elf &eh);
 };
 
 #endif

@@ -8,6 +8,11 @@ Elf::Elf(void){
 	memset(&ehdr, 0, sizeof(ehdr));
 };
 
+Elf::Elf(Device &bd){
+	memset(&ehdr, 0, sizeof(ehdr));
+	this->eh_parser(bd); // パーサの呼び出し
+};
+
 Elf::~Elf(void){
 };
 

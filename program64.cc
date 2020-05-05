@@ -6,32 +6,33 @@
 Program::Program(void){
 };
 
-Program::Program(Elf &eh){
+Program::Program(Device &bd, Elf &eh){
 	phdr=new Elf64_Phdr[eh.E_phnum()];
+	this->ph_parser(bd, eh);
 };
 
 Program::~Program(void){
 };
 
-void Program::ph_parser(Device &bd, Elf &eh, Program &ph){
+void Program::ph_parser(Device &bd, Elf &eh){
 
 	//Device クラスのデータカウンタの位置をe_phoff に移動する．
 	bd.setDC(bd, eh.E_phoff());
 
 	for(int i=0;i<eh.E_phnum();i++){
 		// 仕様書に従って構造体へダンプ
-		ph.phdr[i].p_type=bd.get32bit(bd);
-		ph.phdr[i].p_flags=bd.get32bit(bd);
-		ph.phdr[i].p_offset=bd.get64bit(bd);
-		ph.phdr[i].p_vaddr=bd.get64bit(bd);
-		ph.phdr[i].p_paddr=bd.get64bit(bd);
-		ph.phdr[i].p_filesz=bd.get64bit(bd);
-		ph.phdr[i].p_memsz=bd.get64bit(bd);
-		ph.phdr[i].p_align=bd.get64bit(bd);
+		phdr[i].p_type=bd.get32bit(bd);
+		phdr[i].p_flags=bd.get32bit(bd);
+		phdr[i].p_offset=bd.get64bit(bd);
+		phdr[i].p_vaddr=bd.get64bit(bd);
+		phdr[i].p_paddr=bd.get64bit(bd);
+		phdr[i].p_filesz=bd.get64bit(bd);
+		phdr[i].p_memsz=bd.get64bit(bd);
+		phdr[i].p_align=bd.get64bit(bd);
 	}
 };
 
-void Program::show_phdr(Device &bd, Elf &eh, Program &ph){
+void Program::show_phdr(Device &bd, Elf &eh){
 
 	std::cout<<"This ELF file is of type DYN (Shared Object File). "<<std::endl;
 	std::cout<<"Entry Point : 0x"<<hexformat(8)<<eh.E_entry()<<std::endl;
@@ -43,7 +44,7 @@ void Program::show_phdr(Device &bd, Elf &eh, Program &ph){
 
 	for(int i=0;i<eh.E_phnum();i++){
 		/* Type */
-		switch(ph.phdr[i].p_type){
+		switch(phdr[i].p_type){
 			case PT_NULL:
 				std::cout<<setw_left(18)<<"  NULL"; break;
 			case PT_LOAD:
@@ -91,32 +92,32 @@ void Program::show_phdr(Device &bd, Elf &eh, Program &ph){
 		std::cout<<std::right;
 
 		/* Offset */
-		std::cout<<"0x"<<hexformat(16)<<ph.phdr[i].p_offset;
+		std::cout<<"0x"<<hexformat(16)<<phdr[i].p_offset;
 
 		/* Virtual Address */
-		std::cout<<"  0x"<<hexformat(16)<<ph.phdr[i].p_vaddr;
+		std::cout<<"  0x"<<hexformat(16)<<phdr[i].p_vaddr;
 
 		/* Physical Address */
-		std::cout<<"  0x"<<hexformat(16)<<ph.phdr[i].p_paddr<<std::endl;;
+		std::cout<<"  0x"<<hexformat(16)<<phdr[i].p_paddr<<std::endl;;
 
 		/* File Size */
-		std::cout<<"                  0x"<<hexformat(16)<<ph.phdr[i].p_filesz;
+		std::cout<<"                  0x"<<hexformat(16)<<phdr[i].p_filesz;
 
 		/* Memory Size */
-		std::cout<<"  0x"<<hexformat(16)<<ph.phdr[i].p_memsz;
+		std::cout<<"  0x"<<hexformat(16)<<phdr[i].p_memsz;
 
 		/* Flags */
 		std::string flags;
-		if((ph.phdr[i].p_flags & PF_X)==PF_X) flags.insert(flags.begin(),'X');
-		if((ph.phdr[i].p_flags & PF_W)==PF_W) flags.insert(flags.begin(),'W');
-		if((ph.phdr[i].p_flags & PF_R)==PF_R) flags.insert(flags.begin(),'R');
-		if((ph.phdr[i].p_flags & PF_MASKOS)==PF_MASKOS) flags+='O';
-		if((ph.phdr[i].p_flags & PF_MASKPROC)==PF_MASKPROC) flags+='P';
+		if((phdr[i].p_flags & PF_X)==PF_X) flags.insert(flags.begin(),'X');
+		if((phdr[i].p_flags & PF_W)==PF_W) flags.insert(flags.begin(),'W');
+		if((phdr[i].p_flags & PF_R)==PF_R) flags.insert(flags.begin(),'R');
+		if((phdr[i].p_flags & PF_MASKOS)==PF_MASKOS) flags+='O';
+		if((phdr[i].p_flags & PF_MASKPROC)==PF_MASKPROC) flags+='P';
 
 		std::cout<<"   "<<setw_left(4)<<flags<<std::right;
 
 		/* Alignment */
-		std::cout<<"   0x"<<hexformat(8)<<ph.phdr[i].p_align<<"\n"<<std::endl;;
+		std::cout<<"   0x"<<hexformat(8)<<phdr[i].p_align<<"\n"<<std::endl;;
 
 	}
 
