@@ -14,6 +14,8 @@ Section::Section(Device &bd, Elf &eh){
 };
 
 Section::~Section(void){
+	delete [] shdr;
+	delete [] sh_name;
 };
 
 void Section::sh_parser(Device &bd, Elf &eh){ // ここでElfクラスの情報が必要なので，クラスの参照をコンストラクタの引数として受け取っている．
@@ -35,6 +37,11 @@ void Section::sh_parser(Device &bd, Elf &eh){ // ここでElfクラスの情報�
 		shdr[i].sh_addralign=bd.get64bit(bd);
 		shdr[i].sh_entsize=bd.get64bit(bd);
 	}
+
+		// セクション名取得
+		// shdr[eh.E_shstrndx()]の情報を使っているので，上のループと同時に実行してはならない
+		// 仕組みとしては，.shstrtab セクションのバイトオフセットから，各セクションの名前が格納されている場所のバイトオフセットであるshdr[i].sh_nameの位置を指定している．
+	for(int i=0;i<eh.E_shnum();i++) this->getsh_name(bd, eh, shdr[eh.E_shstrndx()].sh_offset+shdr[i].sh_name, i);
 };
 
 void Section::getsh_name(Device &bd, Elf &eh, int Dec_addr, int sec_num){
@@ -45,8 +52,9 @@ void Section::getsh_name(Device &bd, Elf &eh, int Dec_addr, int sec_num){
 	bd.setSP(bd, Dec_addr); // ここの第二引数には，バイトオフセットをそのまま投げ込めば良い．(番地情報じゃなくて，ファイル冒頭から何バイト分の位置にあるのか)
 	int i=0;
 	while(1){
-		sh_name[sec_num]+=bd.getChar(bd);
-		if(sh_name[sec_num][i]=='\0') break; // このままだと文字列の最後に'\0'が2個格納される．まぁ問題は無いかもだけど．
+		char ch=bd.getChar(bd);
+		if(ch=='\0') break;
+		sh_name[sec_num]+=ch;
 		i++;
 	}
 
@@ -62,9 +70,6 @@ void Section::show_shdr(Device &bd, Elf &eh){
 	std::cout<<"            "<<setw_left(18)<<"Size"<<setw_left(18)<<"EntSize"<<setw_left(18)<<"Flag  Link  Info  Alignment\n"<<std::endl;
 
 	for(int i=0;i<eh.E_shnum();i++){
-		// セクション名取得
-		this->getsh_name(bd, eh, shdr[eh.E_shstrndx()].sh_offset+shdr[i].sh_name, i);
-		// 仕組みとしては，.shstrtab セクションのバイトオフセットから，各セクションの名前が格納されている場所のバイトオフセットであるshdr[i].sh_nameの位置を指定している．
 
 		/* Name */
 		std::cout<<"   [ "<<std::dec<<setw_right(2)<<i<<" ]   "<<setw_left(19)<<sh_name[i]; // std::setwの使用なのか，何故か末尾に謎の文字が入ってしまうため，これを考慮して19としている．

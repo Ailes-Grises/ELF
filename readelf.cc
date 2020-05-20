@@ -15,9 +15,9 @@ int main(int argc, char *argv[]){
 		switch(opt){
 			case 'h':
 	Ehdr.show_ehdr(); break;
-			case 'l':
-	Shdr.show_shdr(bd, Ehdr); break;
 			case 'S':
+	Shdr.show_shdr(bd, Ehdr); break;
+			case 'l':
 	Phdr.show_phdr(bd, Ehdr); break;
 			default:
 				std::cerr<<"Please type option: \n"<<std::endl;

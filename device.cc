@@ -32,6 +32,7 @@ Device::Device(const char *path):Endian(LE){
 };
 
 Device::~Device(void){
+	delete [] data;
 };
 
 int Device::Fsize(void){

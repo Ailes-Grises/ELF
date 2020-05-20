@@ -12,6 +12,7 @@ Program::Program(Device &bd, Elf &eh){
 };
 
 Program::~Program(void){
+	delete [] phdr;
 };
 
 void Program::ph_parser(Device &bd, Elf &eh){

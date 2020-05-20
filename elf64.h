@@ -6,6 +6,9 @@
 #define hexformat(wd) std::hex<<std::setfill('0')<<std::setw(wd)
 // uint8_t型は本来unsigned char なので，この関数を使ってuint8_t型の16進数を16進表示させるには，直前に(unsigned int)とかで整数型にキャストする必要がある．
 
+#define DYNSYM 0
+#define SYMTAB 1
+
 #ifndef _Elf_
 #define _Elf_
 #include<elf.h>
@@ -33,7 +36,7 @@ class Elf{
 	uint16_t E_phnum(void);
 	uint16_t E_shentsize(void);
 	uint16_t E_shnum(void);
-	uint16_t E_shstrndx(void);
+	uint16_t E_shstrndx(void); // eh.e_shstrndx 番目のセクションにセクションヘッダ名の文字列が入っている．
 
 	void eh_parser(Device &obj);
 	void show_ehdr(void);
@@ -61,6 +64,18 @@ class Program{
 	~Program(void);
 	void ph_parser(Device &bd, Elf &eh);
 	void show_phdr(Device &bd, Elf &eh);
+};
+
+class Symbol{
+	private:
+	Elf64_Sym *symbol;
+	int sym_type;
+	public:
+	Symbol(void);
+	Symbol(Device &bd, int sym_type);
+	~Symbol(void);
+	void sym_parser(Device &bd, Section &sh);
+	void show_symtab(Device &bd, Section &sh);
 };
 
 #endif
