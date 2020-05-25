@@ -1,15 +1,12 @@
 #include<iostream>
 #include<cstdlib>
-#include<string.h>
+#include<string>
 #include<unistd.h>
 #include<sys/types.h>
 #include<sys/stat.h>
 #include<fcntl.h>
 #include<stdint.h>
 #include"device.h"
-
-Device::Device(void){
-};
 
 Device::Device(const char *path):Endian(LE){
 	int fd;
@@ -19,15 +16,13 @@ Device::Device(const char *path):Endian(LE){
 		exit(1);
 	}
 	fstat(fd, &st);
-	fsize=st.st_size;
-	if((data=new uint8_t[fsize])==NULL){
-		std::cerr<<"new failed. "<<std::endl;
+	if((data=new uint8_t[st.st_size])==NULL){
+		std::cerr<<"[Error] new failed. [at Device::Device()]"<<endl;
 		exit(1);
 	}
-	read(fd, data, fsize);
+	read(fd, data, st.st_size);
 	dc=data;
 	sp=data;
-	// delete はしない．
 	close(fd);
 };
 
@@ -35,35 +30,31 @@ Device::~Device(void){
 	delete [] data;
 };
 
-int Device::Fsize(void){
-	return fsize;
-};
-
-void Device::setDC(Device &obj, int Dec_addr){
+void Device::setDC(int addr){
 	// 10進数のファイルオフセット(アドレス)を受け取り，*dc の値を変更する．
-	dc=data+Dec_addr*sizeof(uint8_t);
+	dc=data+addr*sizeof(uint8_t);
 	return;
 };
 
-uint8_t* Device::getDC(Device &obj){
+uint8_t* Device::getDC(void){
 	return dc;
 };
 
-uint8_t* Device::getDATA(Device &obj){
+uint8_t* Device::getDATA(void){
 	return data;
 };
 
-void Device::showDC(Device &obj){
-	std::cout<<"*dc : "<<hexformat(2)<<(unsigned int)*dc<<std::endl;
+void Device::showDC(void){
+	cout<<"*dc : "<<hexformat(2)<<(unsigned int)*dc<<endl;
 };
 
-void Device::setSP(Device &obj, int Dec_addr){
+void Device::setSP(int addr){
 	// 10進数のファイルオフセット(アドレス)を受け取り，*sp の値を変更する．
-	sp=data+Dec_addr*sizeof(uint8_t);
+	sp=data+addr*sizeof(uint8_t);
 	return;
 };
 
-uint8_t Device::get8bit(Device &obj){
+uint8_t Device::get8bit(void){
 	uint8_t *temp=dc;
 	dc+=sizeof(uint8_t);
 	return *(temp); // 読み込んだらdcを一つ進める．
@@ -72,7 +63,7 @@ uint8_t Device::get8bit(Device &obj){
 	// リトルエンディアンに従う領域でこの関数を複数回呼ぶのはマズい．そういう時は別の関数を作ったほうが良い．
 };
 
-uint16_t Device::get16bit(Device &obj){
+uint16_t Device::get16bit(void){
 	uint8_t *temp=dc;
 	dc+=2; //先にカウンタだけは次のデータ読み出しの位置に移動しておいてある．だから+=1ではなくて+=2である．
 	//dc+=2*sizeof(uint8_t);
@@ -88,25 +79,25 @@ uint16_t Device::get16bit(Device &obj){
 	}
 };
 
-uint32_t Device::get32bit(Device &obj){
+uint32_t Device::get32bit(void){
 	if(Endian==LE){
-		return obj.get16bit(obj)|((uint32_t)obj.get16bit(obj)<<16);
+		return this->get16bit()|((uint32_t)this->get16bit()<<16);
 	}
 	else{
-		return ((uint32_t)obj.get16bit(obj))<<16|(uint32_t)obj.get16bit(obj);
+		return ((uint32_t)this->get16bit())<<16|(uint32_t)this->get16bit();
 	}
 };
 
-uint64_t Device::get64bit(Device &obj){
+uint64_t Device::get64bit(void){
 	if(Endian==LE){
-		return (uint64_t)obj.get32bit(obj)|((uint64_t)obj.get32bit(obj)<<32);
+		return (uint64_t)this->get32bit()|((uint64_t)this->get32bit()<<32);
 	}
 	else{
-		return ((uint64_t)obj.get32bit(obj))<<32|(uint64_t)obj.get32bit(obj);
+		return ((uint64_t)this->get32bit())<<32|(uint64_t)this->get32bit();
 	}
 };
 
-uint8_t Device::getChar(Device &obj){
+uint8_t Device::getChar(void){
 	uint8_t *temp=sp;
 	sp+=sizeof(uint8_t);
 	return *(temp);

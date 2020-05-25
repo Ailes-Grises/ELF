@@ -2,6 +2,9 @@
 #include<iostream>
 #include<iomanip>
 #include<string>
+using std::cout;
+using std::endl;
+using std::cerr;
 
 #define LE 0 // リトルエンディアン
 #define BE 1 // ビッグエンディアン
@@ -16,26 +19,24 @@
 class Device{
 	private:
 	uint8_t *data; // バイナリデータを格納．
-	int fsize;
 	uint8_t *dc; // data[]上のデータカウンタ． *data に直接アクセスしないほうが良い． このメンバは，他のクラス上から値を変更したい場合があるため，専用の関数を用意する(SetDC(Device &obj))．
-	uint8_t *sp; // いわゆるスタックポインタ．
+	uint8_t *sp; // スタックポインタ．*dataを動かしたくない時はこっちを使う．
 	int Endian; // エンディアンフラグ．まだ未定義．デフォルトでどっちかに設定しといたほうがいいかも．
 
 	public:
-	Device(void);
 	Device(const char *path);
 	~Device(void);
-	int Fsize(void);
-	void setDC(Device &obj, int Dec_addr); // *dcの指すアドレスを変更する関数．
-	uint8_t* getDC(Device &obj); // 他クラス用．dcの指しているアドレス自体を返す関数．
-	uint8_t* getDATA(Device &obj); // 他クラス用．dataの指しているアドレス自体を返す関数．
-	void showDC(Device &obj); // デバッグ用．
-	void setSP(Device &obj, int Dec_addr); // *spの指すアドレスを変更する関数．
-	uint8_t get8bit(Device &obj); // 以下の get*bit() はエンディアン補正済み．
-	uint16_t get16bit(Device &obj);
-	uint32_t get32bit(Device &obj);
-	uint64_t get64bit(Device &obj);
-	uint8_t getChar(Device &obj); // 内部で*spを使用．バイトオフセットは考慮されていない．
+	void setDC(int addr); // *dcの指すアドレスを変更する関数．
+	uint8_t* getDC(void); // 他クラス用．dcの指しているアドレス自体を返す関数．
+	uint8_t* getDATA(void); // 他クラス用．dataの指しているアドレス自体を返す関数．
+	void showDC(void); // デバッグ用．
+	void setSP(int addr); // *spの指すアドレスを変更する関数．
+
+	uint8_t get8bit(void); // 以下の get*bit() はエンディアン補正済み．
+	uint16_t get16bit(void);
+	uint32_t get32bit(void);
+	uint64_t get64bit(void);
+	uint8_t getChar(void); // 内部で*spを使用．バイトオフセットは考慮されていない．
 };
 
 // デバッグ用の便利関数．

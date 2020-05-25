@@ -4,10 +4,6 @@
 #include<elf.h>
 #include"elf64.h"
 
-Elf::Elf(void){
-	memset(&ehdr, 0, sizeof(ehdr));
-};
-
 Elf::Elf(Device &bd){
 	memset(&ehdr, 0, sizeof(ehdr));
 	this->eh_parser(bd); // パーサの呼び出し
@@ -72,192 +68,192 @@ uint16_t Elf::E_shstrndx(void){
 	return ehdr.e_shstrndx;
 };
 
-void Elf::eh_parser(Device &obj){
-	for(int i=0;i<EI_NIDENT;i++) ehdr.e_ident[i]=obj.get8bit(obj);
+void Elf::eh_parser(Device &bd){
+	for(int i=0;i<EI_NIDENT;i++) ehdr.e_ident[i]=bd.get8bit();
 
-	ehdr.e_type=obj.get16bit(obj);
-	ehdr.e_machine=obj.get16bit(obj);
-	ehdr.e_version=obj.get32bit(obj);
-	ehdr.e_entry=obj.get64bit(obj);
-	ehdr.e_phoff=obj.get64bit(obj);
-	ehdr.e_shoff=obj.get64bit(obj);
-	ehdr.e_flags=obj.get32bit(obj);
-	ehdr.e_ehsize=obj.get16bit(obj);
-	ehdr.e_phentsize=obj.get16bit(obj);
-	ehdr.e_phnum=obj.get16bit(obj);
-	ehdr.e_shentsize=obj.get16bit(obj);
-	ehdr.e_shnum=obj.get16bit(obj);
-	ehdr.e_shstrndx=obj.get16bit(obj);
+	ehdr.e_type=bd.get16bit();
+	ehdr.e_machine=bd.get16bit();
+	ehdr.e_version=bd.get32bit();
+	ehdr.e_entry=bd.get64bit();
+	ehdr.e_phoff=bd.get64bit();
+	ehdr.e_shoff=bd.get64bit();
+	ehdr.e_flags=bd.get32bit();
+	ehdr.e_ehsize=bd.get16bit();
+	ehdr.e_phentsize=bd.get16bit();
+	ehdr.e_phnum=bd.get16bit();
+	ehdr.e_shentsize=bd.get16bit();
+	ehdr.e_shnum=bd.get16bit();
+	ehdr.e_shstrndx=bd.get16bit();
 };
 
 void Elf::show_ehdr(void){
-	std::cout<<"ELF Header:"<<std::endl;
+	cout<<"ELF Header:"<<endl;
 
 	/* e_ident[EI_NIDENT] */
 
-	std::cout<<" Magic:    ";
-	for(int i=0;i<EI_NIDENT;i++) std::cout<<hexformat(2)<<(unsigned int)ehdr.e_ident[i]<<" ";
-	std::cout<<std::endl;
+	cout<<" Magic:    ";
+	for(int i=0;i<EI_NIDENT;i++) cout<<hexformat(2)<<(unsigned int)ehdr.e_ident[i]<<" ";
+	cout<<endl;
 
 	switch(ehdr.e_ident[EI_CLASS]){
 		case ELFCLASS64:
-			std::cout<<" Class:                             ELF64"<<std::endl; break;
+			cout<<" Class:                             ELF64"<<endl; break;
 		case ELFCLASS32:
-			std::cout<<" Class:                             ELF32"<<std::endl; break;
+			cout<<" Class:                             ELF32"<<endl; break;
 		default:
-			std::cout<<" Class:                             Invalid Class"<<std::endl; break;
+			cout<<" Class:                             Invalid Class"<<endl; break;
 	}
 
 	switch(ehdr.e_ident[EI_DATA]){
 		case ELFDATA2LSB:
-			std::cout<<" Data:                              2's Complement, Little Endian"<<std::endl; break;
+			cout<<" Data:                              2's Complement, Little Endian"<<endl; break;
 		case ELFDATA2MSB:
-			std::cout<<" Data:                              2's Complement, Big Endian"<<std::endl; break;
+			cout<<" Data:                              2's Complement, Big Endian"<<endl; break;
 		default:
-			std::cout<<" Data:                              Invalid Data Format"<<std::endl; break;
+			cout<<" Data:                              Invalid Data Format"<<endl; break;
 	}
 
 	switch(ehdr.e_ident[EI_VERSION]){
 		case EV_CURRENT:
-			std::cout<<" Version:                           1 (current)"<<std::endl; break;
+			cout<<" Version:                           1 (current)"<<endl; break;
 		default:
-			std::cout<<" Version:                           0 (illegal)"<<std::endl; break;
+			cout<<" Version:                           0 (illegal)"<<endl; break;
 	}
 
 	switch(ehdr.e_ident[EI_OSABI]){
 		case ELFOSABI_SYSV:
-			std::cout<<" OS/ABI:                            UNIX - System V"<<std::endl; break;
+			cout<<" OS/ABI:                            UNIX - System V"<<endl; break;
 		case ELFOSABI_HPUX:
-			std::cout<<" OS/ABI:                            HP-UX"<<std::endl; break;
+			cout<<" OS/ABI:                            HP-UX"<<endl; break;
 		case ELFOSABI_NETBSD:
-			std::cout<<" OS/ABI:                            NetBSD"<<std::endl; break;
+			cout<<" OS/ABI:                            NetBSD"<<endl; break;
 		case ELFOSABI_LINUX:
-			std::cout<<" OS/ABI:                            Linux"<<std::endl; break;
+			cout<<" OS/ABI:                            Linux"<<endl; break;
 		case ELFOSABI_SOLARIS:
-			std::cout<<" OS/ABI:                            Solaris"<<std::endl; break;
+			cout<<" OS/ABI:                            Solaris"<<endl; break;
 		case ELFOSABI_IRIX:
-			std::cout<<" OS/ABI:                            IRIX"<<std::endl; break;
+			cout<<" OS/ABI:                            IRIX"<<endl; break;
 		case ELFOSABI_FREEBSD:
-			std::cout<<" OS/ABI:                            FreeBSD"<<std::endl; break;
+			cout<<" OS/ABI:                            FreeBSD"<<endl; break;
 		case ELFOSABI_TRU64:
-			std::cout<<" OS/ABI:                            TRU64 - UNIX"<<std::endl; break;
+			cout<<" OS/ABI:                            TRU64 - UNIX"<<endl; break;
 		case ELFOSABI_ARM:
-			std::cout<<" OS/ABI:                            ARM"<<std::endl; break;
+			cout<<" OS/ABI:                            ARM"<<endl; break;
 		case ELFOSABI_STANDALONE:
-			std::cout<<" OS/ABI:                            Standalone"<<std::endl; break;
+			cout<<" OS/ABI:                            Standalone"<<endl; break;
 		default:
-			std::cout<<" OS/ABI:                            UNIX - System V"<<std::endl; break;
+			cout<<" OS/ABI:                            UNIX - System V"<<endl; break;
 	}
 
 	// ここだけ決め打ち
-	std::cout<<" ABI Version:                       0"<<std::endl;
+	cout<<" ABI Version:                       0"<<endl;
 
 	/* e_type */
 
 	switch(ehdr.e_type){
 		case ET_REL: 
-			std::cout<<" Type:                              REL (Relocatable File)"<<std::endl; break;
+			cout<<" Type:                              REL (Relocatable File)"<<endl; break;
 		case ET_EXEC: 
-			std::cout<<" Type:                              EXEC (Executable File)"<<std::endl; break;
+			cout<<" Type:                              EXEC (Executable File)"<<endl; break;
 		case ET_DYN: 
-			std::cout<<" Type:                              DYN (Shared Object File)"<<std::endl; break;
+			cout<<" Type:                              DYN (Shared Object File)"<<endl; break;
 		case ET_CORE: 
-			std::cout<<" Type:                              CORE (Core File)"<<std::endl; break;
+			cout<<" Type:                              CORE (Core File)"<<endl; break;
 		default: 
-			std::cout<<" Type:                              NONE (Invalid Type)"<<std::endl; break;
+			cout<<" Type:                              NONE (Invalid Type)"<<endl; break;
 	}
 
 	/* e_machine */
 
 	switch(ehdr.e_machine){
 		case EM_M32: 
-			std::cout<<" Architecture:                      AT&T WE 32100"<<std::endl; break;
+			cout<<" Architecture:                      AT&T WE 32100"<<endl; break;
 		case EM_SPARC: 
-			std::cout<<" Architecture:                      Sun Microsystems SPARC"<<std::endl; break;
+			cout<<" Architecture:                      Sun Microsystems SPARC"<<endl; break;
 		case EM_386: 
-			std::cout<<" Architecture:                      Intel 80386"<<std::endl; break;
+			cout<<" Architecture:                      Intel 80386"<<endl; break;
 		case EM_68K: 
-			std::cout<<" Architecture:                      Motorola 68000"<<std::endl; break;
+			cout<<" Architecture:                      Motorola 68000"<<endl; break;
 		case EM_88K: 
-			std::cout<<" Architecture:                      Motorola 88000"<<std::endl; break;
+			cout<<" Architecture:                      Motorola 88000"<<endl; break;
 		case EM_860: 
-			std::cout<<" Architecture:                      Intel 80860"<<std::endl; break;
+			cout<<" Architecture:                      Intel 80860"<<endl; break;
 		case EM_MIPS: 
-			std::cout<<" Architecture:                      MIPS RS3000"<<std::endl; break;
+			cout<<" Architecture:                      MIPS RS3000"<<endl; break;
 		case EM_PARISC: 
-			std::cout<<" Architecture:                      HP/PA"<<std::endl; break;
+			cout<<" Architecture:                      HP/PA"<<endl; break;
 		case EM_SPARC32PLUS: 
-			std::cout<<" Architecture:                      SPARC with Extended Instruction Set"<<std::endl; break;
+			cout<<" Architecture:                      SPARC with Extended Instruction Set"<<endl; break;
 		case EM_PPC: 
-			std::cout<<" Architecture:                      PowerPC"<<std::endl; break;
+			cout<<" Architecture:                      PowerPC"<<endl; break;
 		case EM_PPC64: 
-			std::cout<<" Architecture:                      PowerPC 64-bit"<<std::endl; break;
+			cout<<" Architecture:                      PowerPC 64-bit"<<endl; break;
 		case EM_S390: 
-			std::cout<<" Architecture:                      IBM S/390"<<std::endl; break;
+			cout<<" Architecture:                      IBM S/390"<<endl; break;
 		case EM_ARM: 
-			std::cout<<" Architecture:                      ARM"<<std::endl; break;
+			cout<<" Architecture:                      ARM"<<endl; break;
 		case EM_SH: 
-			std::cout<<" Architecture:                      Renesas SuperH"<<std::endl; break;
+			cout<<" Architecture:                      Renesas SuperH"<<endl; break;
 		case EM_SPARCV9: 
-			std::cout<<" Architecture:                      SPARC v9 64-bit"<<std::endl; break;
+			cout<<" Architecture:                      SPARC v9 64-bit"<<endl; break;
 		case EM_IA_64: 
-			std::cout<<" Architecture:                      Intel Itanium"<<std::endl; break;
+			cout<<" Architecture:                      Intel Itanium"<<endl; break;
 		case EM_X86_64: 
-			std::cout<<" Architecture:                      AMD x86-64"<<std::endl; break;
+			cout<<" Architecture:                      AMD x86-64"<<endl; break;
 		case EM_VAX: 
-			std::cout<<" Architecture:                      DEC Vax"<<std::endl; break;
+			cout<<" Architecture:                      DEC Vax"<<endl; break;
 		default: 
-			std::cout<<" Architecture:                      Unknown Architecture"<<std::endl; break;
+			cout<<" Architecture:                      Unknown Architecture"<<endl; break;
 	}
 
 	/* e_version */
 
 	switch(ehdr.e_version){
 		case EV_CURRENT:
-			std::cout<<" Version:                           Current Version(0x01)"<<std::endl; break;
+			cout<<" Version:                           Current Version(0x01)"<<endl; break;
 		default:
-			std::cout<<" Version:                           Unknown Version(0x00)"<<std::endl; break;
+			cout<<" Version:                           Unknown Version(0x00)"<<endl; break;
 	}
 
 	/* e_entry */
 
-	std::cout<<" Entry Point Address:               0x"<<hexformat(8)<<ehdr.e_entry<<std::endl;
+	cout<<" Entry Point Address:               0x"<<hexformat(8)<<ehdr.e_entry<<endl;
 
 	/* e_flags */
 
-	std::cout<<" Flag:                              0x"<<hexformat(2)<<ehdr.e_flags<<std::endl;
+	cout<<" Flag:                              0x"<<hexformat(2)<<ehdr.e_flags<<endl;
 
 	/* e_ehsize */
 
-	std::cout<<" Elf Header Size:                   "<<std::dec<<ehdr.e_ehsize<<" Bytes"<<std::endl;
+	cout<<" Elf Header Size:                   "<<std::dec<<ehdr.e_ehsize<<" Bytes"<<endl;
 
-	std::cout<<"=================================="<<std::endl;
+	cout<<"=================================="<<endl;
 
 	/* e_phoff */
 
-	std::cout<<" Program Header Table Offset:     0x"<<hexformat(8)<<ehdr.e_phoff<<" ("<<std::dec<<ehdr.e_phoff<<" Bytes Offset)"<<std::endl;
+	cout<<" Program Header Table Offset:     0x"<<hexformat(8)<<ehdr.e_phoff<<" ("<<std::dec<<ehdr.e_phoff<<" Bytes Offset)"<<endl;
 
 	/* e_phentsize */
-	std::cout<<" Program Header Size:               "<<ehdr.e_phentsize<<" Bytes"<<std::endl;
+	cout<<" Program Header Size:               "<<ehdr.e_phentsize<<" Bytes"<<endl;
 
 	/* e_phnum */
-	std::cout<<" Number of Program Header           "<<ehdr.e_phnum<<std::endl;
+	cout<<" Number of Program Header           "<<ehdr.e_phnum<<endl;
 
-	std::cout<<"=================================="<<std::endl;
+	cout<<"=================================="<<endl;
 
 	/* e_shoff */
 
-	std::cout<<" Section Header Table Offset:     0x"<<hexformat(8)<<ehdr.e_shoff<<" ("<<std::dec<<ehdr.e_shoff<<" Bytes Offset)"<<std::endl;
+	cout<<" Section Header Table Offset:     0x"<<hexformat(8)<<ehdr.e_shoff<<" ("<<std::dec<<ehdr.e_shoff<<" Bytes Offset)"<<endl;
 
 	/* e_shentsize */
-	std::cout<<" Section Header Size:               "<<ehdr.e_shentsize<<" Bytes"<<std::endl;
+	cout<<" Section Header Size:               "<<ehdr.e_shentsize<<" Bytes"<<endl;
 
 	/* e_shnum */
-	std::cout<<" Number of Section Header:          "<<ehdr.e_shnum<<std::endl;
+	cout<<" Number of Section Header:          "<<ehdr.e_shnum<<endl;
 
 	/* e_shstrndx */
-	std::cout<<" Section Header String Table Index: "<<ehdr.e_shstrndx<<std::endl;
+	cout<<" Section Header String Table Index: "<<ehdr.e_shstrndx<<endl;
 
-	std::cout<<"==================================\n"<<std::endl;
+	cout<<"==================================\n"<<endl;
 
 };
