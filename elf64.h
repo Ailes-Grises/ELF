@@ -42,7 +42,7 @@ class Elf{
 class Section{
 	private:
 	Elf64_Shdr *shdr; // ポインタ表記にしておいて，コンストラクタでsizeof(Elf64_Shdr)*e_shnum だけ領域確保する．
-	std::string *sh_name; // 文字通りsh_nameを格納する文字列クラス型配列．
+	std::string *sh_name; // sh_nameの文字列を格納する文字列クラス型配列．
 	std::unordered_map<std::string, int> section_hash; // セクション名と番号のハッシュテーブル．
 
 	public:
@@ -60,7 +60,7 @@ class Section{
 	uint64_t Sh_entsize(int seq);
 
 	void sh_parser(Device &bd, Elf &eh); // こうすればElfクラスのデータにもアクセスし放題．ただし，当然だがElfクラスのプライベートメンバにアクセスするときには，専用の読み出し関数を介さなければならない．
-	void getsh_name(Device &bd, Elf &eh, int addr, int sec_num); // sh_nameの読み出し関数．当初は汎用性のある文字列読み出し関数を作成し，それをオーバーラップする予定だったが，よく考えたらこのクラスから他の文字列の読み出しを行うことが無い気がしたのでsh_nameの読み出し専用の関数にすることにした．
+	void getsh_name(Device &bd, Elf &eh, int addr, int sec_num); // 各セクションの名前を読み出してstd::string sh_name を初期化する関数．
 	int Section_hash(std::string key); // ハッシュ関数．
 	void show_shdr(Device &bd, Elf &eh);
 };
@@ -77,11 +77,11 @@ class Program{
 
 class Symbol{
 	private:
-	Elf64_Sym *symbol; // シンボルテーブルを格納する配列．
-	std::string *st_name; // st_name を格納する配列．
+	Elf64_Sym *symbol; // シンボルテーブル(構造体)を格納する配列．
+	std::string *st_name; // st_name の文字列を格納する配列．
 	std::unordered_map<std::string, int> symbol_hash; // シンボル名とシーケンス番号のハッシュ．要するに名前から該当する配列のシーケンス番号が分かるようにしたい．
-	std::string symtab_name;
-	unsigned int symbol_num;
+	std::string symtab_name; // 解析対象セクションの名前．(.dynsym等)
+	unsigned int symbol_num; // 解析対象セクションに格納されているシンボルテーブル(構造体)の個数．
 
 	public:
 	Symbol(Device &bd, Section &sh, std::string symtab_name);
@@ -95,7 +95,7 @@ class Symbol{
 	int Symbol_hash(std::string key); // ハッシュ関数．
 
 	void sym_parser(Device &bd, Section &sh);
-	void getsym_name(Device &bd, int addr, int sec_num);
+	void getsym_name(Device &bd, int addr, int sec_num); // シンボルの名前を読み出してstd::string st_name を初期化する関数．
 	void show_symtab(Device &bd, Section &sh);
 };
 
