@@ -4,9 +4,9 @@
 #include<elf.h>
 #include"elf64.h"
 
-Program::Program(Device &bd, Elf &eh){
-	phdr=new Elf64_Phdr[eh.E_phnum()];
-	for(int i=0;i<eh.E_phnum();i++) memset(&phdr[i], 0, sizeof(phdr[i]));
+Program::Program(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh){
+	phdr=new Elf64_Phdr[eh->E_phnum()];
+	for(int i=0;i<eh->E_phnum();i++) memset(&phdr[i], 0, sizeof(phdr[i]));
 	this->ph_parser(bd, eh);
 };
 
@@ -14,29 +14,29 @@ Program::~Program(void){
 	delete [] phdr;
 };
 
-void Program::ph_parser(Device &bd, Elf &eh){
+void Program::ph_parser(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh){
 
 	//Device クラスのデータカウンタの位置をe_phoff に移動する．
-	bd.setDC(eh.E_phoff());
+	bd->setDC(eh->E_phoff());
 
-	for(int i=0;i<eh.E_phnum();i++){
+	for(int i=0;i<eh->E_phnum();i++){
 		// 仕様書に従って構造体へダンプ
-		phdr[i].p_type=bd.get32bit();
-		phdr[i].p_flags=bd.get32bit();
-		phdr[i].p_offset=bd.get64bit();
-		phdr[i].p_vaddr=bd.get64bit();
-		phdr[i].p_paddr=bd.get64bit();
-		phdr[i].p_filesz=bd.get64bit();
-		phdr[i].p_memsz=bd.get64bit();
-		phdr[i].p_align=bd.get64bit();
+		phdr[i].p_type=bd->get32bit();
+		phdr[i].p_flags=bd->get32bit();
+		phdr[i].p_offset=bd->get64bit();
+		phdr[i].p_vaddr=bd->get64bit();
+		phdr[i].p_paddr=bd->get64bit();
+		phdr[i].p_filesz=bd->get64bit();
+		phdr[i].p_memsz=bd->get64bit();
+		phdr[i].p_align=bd->get64bit();
 	}
 };
 
-void Program::show_phdr(Device &bd, Elf &eh){
+void Program::show_phdr(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh){
 
 	cout<<"This ELF file is of type DYN (Shared Object File). "<<endl;
-	cout<<"Entry Point : 0x"<<hexformat(8)<<eh.E_entry()<<endl;
-	cout<<"There are "<<eh.E_phnum()<<" program headers, starting at offset 0x"<<hexformat(8)<<eh.E_phoff()<<"\n"<<endl;
+	cout<<"Entry Point : 0x"<<hexformat(8)<<eh->E_entry()<<endl;
+	cout<<"There are "<<eh->E_phnum()<<" program headers, starting at offset 0x"<<hexformat(8)<<eh->E_phoff()<<"\n"<<endl;
 
 	cout<<"Program Header: "<<endl;
 	cout<<setw_left(18)<<"  Type";
@@ -48,7 +48,7 @@ void Program::show_phdr(Device &bd, Elf &eh){
 	cout<<setw_right(14)<<"Flags";
 	cout<<"  Alignment\n"<<endl;
 
-	for(int i=0;i<eh.E_phnum();i++){
+	for(int i=0;i<eh->E_phnum();i++){
 		/* Type */
 		switch(phdr[i].p_type){
 			case PT_NULL:

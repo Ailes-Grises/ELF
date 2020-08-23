@@ -1,10 +1,11 @@
 #include<iostream>
 #include<iomanip>
+#include<memory>
 #include<unordered_map>
 
-#define setw_left(wd) std::setw(wd)<<std::setfill(' ')<<std::left
-#define setw_right(wd) std::setw(wd)<<std::setfill(' ')<<std::right
-#define hexformat(wd) std::hex<<std::setfill('0')<<std::setw(wd)
+#define setw_left(wd) std::setw(wd) << std::setfill(' ') << std::left
+#define setw_right(wd) std::setw(wd) << std::setfill(' ') << std::right
+#define hexformat(wd) std::hex << std::setfill('0') << std::setw(wd)
 // uint8_t型は本来unsigned char なので，この関数を使ってuint8_t型の16進数を16進表示させるには，直前に(unsigned int)とかで整数型にキャストする必要がある．
 
 #ifndef _Elf_
@@ -16,7 +17,7 @@ class Elf{
 	private:
 	Elf64_Ehdr ehdr;
 	public:
-	Elf(Device &bd);
+	Elf(std::shared_ptr<Device> bd);
 	~Elf(void);
 
 	// 各構造体メンバの読み出し関数
@@ -35,7 +36,7 @@ class Elf{
 	uint16_t E_shnum(void);
 	uint16_t E_shstrndx(void); // eh.e_shstrndx 番目のセクションにセクションヘッダ名の文字列が入っている．
 
-	void eh_parser(Device &bd);
+	void eh_parser(std::shared_ptr<Device> bd);
 	void show_ehdr(void);
 };
 
@@ -46,7 +47,7 @@ class Section{
 	std::unordered_map<std::string, int> section_hash; // セクション名と番号のハッシュテーブル．
 
 	public:
-	Section(Device &bd, Elf &eh); // 動的領域確保
+	Section(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh); // 動的領域確保
 	~Section(void);
 	uint32_t Sh_name(int seq);
 	uint32_t Sh_type(int seq);
@@ -59,20 +60,20 @@ class Section{
 	uint64_t Sh_addralign(int seq);
 	uint64_t Sh_entsize(int seq);
 
-	void sh_parser(Device &bd, Elf &eh); // こうすればElfクラスのデータにもアクセスし放題．ただし，当然だがElfクラスのプライベートメンバにアクセスするときには，専用の読み出し関数を介さなければならない．
-	void getsh_name(Device &bd, Elf &eh, int addr, int sec_num); // 各セクションの名前を読み出してstd::string sh_name を初期化する関数．
+	void sh_parser(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh); // こうすればElfクラスのデータにもアクセスし放題．ただし，当然だがElfクラスのプライベートメンバにアクセスするときには，専用の読み出し関数を介さなければならない．
+	void getsh_name(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh, int addr, int sec_num); // 各セクションの名前を読み出してstd::string sh_name を初期化する関数．
 	int Section_hash(std::string key); // ハッシュ関数．
-	void show_shdr(Device &bd, Elf &eh);
+	void show_shdr(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh);
 };
 
 class Program{
 	private:
 	Elf64_Phdr *phdr;
 	public:
-	Program(Device &bd, Elf &eh);
+	Program(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh);
 	~Program(void);
-	void ph_parser(Device &bd, Elf &eh);
-	void show_phdr(Device &bd, Elf &eh);
+	void ph_parser(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh);
+	void show_phdr(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh);
 };
 
 class Symbol{
@@ -84,7 +85,7 @@ class Symbol{
 	unsigned int symbol_num; // 解析対象セクションに格納されているシンボルテーブル(構造体)の個数．
 
 	public:
-	Symbol(Device &bd, Section &sh, std::string symtab_name);
+	Symbol(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh, std::string symtab_name);
 	~Symbol(void);
 	uint32_t St_name(int seq);
 	unsigned char St_info(int seq);
@@ -94,9 +95,9 @@ class Symbol{
 	uint64_t St_size(int seq);
 	int Symbol_hash(std::string key); // ハッシュ関数．
 
-	void sym_parser(Device &bd, Section &sh);
-	void getsym_name(Device &bd, int addr, int sec_num); // シンボルの名前を読み出してstd::string st_name を初期化する関数．
-	void show_symtab(Device &bd, Section &sh);
+	void sym_parser(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh);
+	void getsym_name(std::shared_ptr<Device> bd, int addr, int sec_num); // シンボルの名前を読み出してstd::string st_name を初期化する関数．
+	void show_symtab(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh);
 };
 
 #endif

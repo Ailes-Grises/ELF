@@ -17,7 +17,7 @@ Device::Device(const char *path):Endian(LE){
 	}
 	fstat(fd, &st);
 	if((data=new uint8_t[st.st_size])==NULL){
-		std::cerr<<"[Error] new failed. [at Device::Device()]"<<endl;
+		std::cerr<<"[Error] new failed. [at Device::Device(const char* )]"<<endl;
 		exit(1);
 	}
 	read(fd, data, st.st_size);

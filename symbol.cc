@@ -4,11 +4,11 @@
 #include<elf.h>
 #include"elf64.h"
 
-Symbol::Symbol(Device &bd, Section &sh, std::string symtab_name){
+Symbol::Symbol(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh, std::string symtab_name){
 	Symbol::symtab_name=symtab_name;
 	// sym_type の値によって確保する領域サイズを変更する．
-	int seq=sh.Section_hash(symtab_name); // シーケンス番号取得
-	Symbol::symbol_num=sh.Sh_size(seq)/sh.Sh_entsize(seq);
+	int seq=sh->Section_hash(symtab_name); // シーケンス番号取得
+	Symbol::symbol_num=sh->Sh_size(seq)/sh->Sh_entsize(seq);
 	symbol = new Elf64_Sym[Symbol::symbol_num];
 	st_name = new std::string[Symbol::symbol_num];
 	for(int i=0;i<Symbol::symbol_num;i++) memset(&symbol[i], 0, sizeof(symbol[i]));
@@ -52,15 +52,15 @@ int Symbol::Symbol_hash(std::string key){
 
 
 
-void Symbol::getsym_name(Device &bd, int addr, int seq){
+void Symbol::getsym_name(std::shared_ptr<Device> bd, int addr, int seq){
 	// 目的の位置(addr)までジャンプし，データを読んで，st_name[seq]に格納する．
 	// int addr は該当データのバイトオフセット．
 
 	// まずはスタックポインタを該当アドレスまでジャンプ．
-	bd.setSP(addr); // ここの第二引数には，バイトオフセットをそのまま投げ込めば良い．(番地情報じゃなくて，ファイル冒頭から何バイト分の位置にあるのか)
+	bd->setSP(addr); // ここの第二引数には，バイトオフセットをそのまま投げ込めば良い．(番地情報じゃなくて，ファイル冒頭から何バイト分の位置にあるのか)
 	int i=0;
 	while(1){
-		char ch=bd.getChar();
+		char ch=bd->getChar();
 		if(ch=='\0') break;
 		st_name[seq]+=ch;
 		i++;
@@ -68,17 +68,17 @@ void Symbol::getsym_name(Device &bd, int addr, int seq){
 	return;
 };
 
-void Symbol::sym_parser(Device &bd, Section &sh){
+void Symbol::sym_parser(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh){
 	// まずは該当箇所までジャンプ．(DCを変更)
-	bd.setDC(sh.Sh_offset(sh.Section_hash(Symbol::symtab_name)));
+	bd->setDC(sh->Sh_offset(sh->Section_hash(Symbol::symtab_name)));
 
 	for(int i=0;i<Symbol::symbol_num;i++){
-		symbol[i].st_name=bd.get32bit();
-		symbol[i].st_info=bd.get8bit();
-		symbol[i].st_other=bd.get8bit();
-		symbol[i].st_shndx=bd.get16bit();
-		symbol[i].st_value=bd.get64bit();
-		symbol[i].st_size=bd.get64bit();
+		symbol[i].st_name=bd->get32bit();
+		symbol[i].st_info=bd->get8bit();
+		symbol[i].st_other=bd->get8bit();
+		symbol[i].st_shndx=bd->get16bit();
+		symbol[i].st_value=bd->get64bit();
+		symbol[i].st_size=bd->get64bit();
 	}
 
 	// 各シンボルの名前を，文字列テーブルを格納しているセクションから読み出して初期化する．
@@ -86,9 +86,9 @@ void Symbol::sym_parser(Device &bd, Section &sh){
 		// シンボル名の取得
 		// シンボルテーブルの種類により，参照すべきセクション番号が変わってくる．
 		if(symtab_name == ".symtab"){
-			this->getsym_name(bd, sh.Sh_offset(sh.Section_hash(".strtab"))+symbol[i].st_name, i);
+			this->getsym_name(bd, sh->Sh_offset(sh->Section_hash(".strtab"))+symbol[i].st_name, i);
 		}else if(symtab_name == ".dynsym"){
-			this->getsym_name(bd, sh.Sh_offset(sh.Section_hash(".dynstr"))+symbol[i].st_name, i);
+			this->getsym_name(bd, sh->Sh_offset(sh->Section_hash(".dynstr"))+symbol[i].st_name, i);
 		}else{
 			cerr<<"[Error] Invalid symbol table name. [at Symbol::sym_parser()]";
 			// エラー処理
@@ -102,7 +102,7 @@ void Symbol::sym_parser(Device &bd, Section &sh){
 	}
 };
 
-void Symbol::show_symtab(Device &bd, Section &sh){
+void Symbol::show_symtab(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh){
 
 	cout<<"Symbol table '"<<symtab_name<<"' contains "<<symbol_num<<" entries:"<<endl;
 

@@ -43,7 +43,8 @@ int main(void){
 	// クラスのインスタンスはこれでも作成可能!
 	// Data *bd(new Data(3));
 	// bd->hello();
-	
+
+	bd->hello();
 
 	// cout<<"何らかのエラー発生"<<endl;
 	// exit(1);

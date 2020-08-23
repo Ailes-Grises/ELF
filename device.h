@@ -1,3 +1,5 @@
+#ifndef _Device_
+#define _Device_
 #include<stdint.h>
 #include<iostream>
 #include<iomanip>
@@ -9,7 +11,7 @@ using std::cerr;
 #define LE 0 // リトルエンディアン
 #define BE 1 // ビッグエンディアン
 
-#define hexformat(wd) std::hex<<std::setfill('0')<<std::setw(wd)
+#define hexformat(wd) std::hex << std::setfill('0') << std::setw(wd)
 // uint8_t型は本来unsigned char なので，この関数を使ってuint8_t型の16進数を16進表示させるには，直前に(unsigned int)とかで整数型にキャストする必要がある．
 
 
@@ -21,7 +23,7 @@ class Device{
 	uint8_t *data; // バイナリデータを格納．
 	uint8_t *dc; // data[]上のデータカウンタ． *data に直接アクセスしないほうが良い． このメンバは，他のクラス上から値を変更したい場合があるため，専用の関数を用意する(SetDC(Device &obj))．
 	uint8_t *sp; // スタックポインタ．*dataを動かしたくない時はこっちを使う．
-	int Endian; // エンディアンフラグ．まだ未定義．デフォルトでどっちかに設定しといたほうがいいかも．
+	bool Endian; // エンディアンフラグ．まだ未定義．デフォルトでどっちかに設定しといたほうがいいかも．
 
 	public:
 	Device(const char *path);
@@ -46,3 +48,5 @@ std::string Hex_fromdec(unsigned int dec); // 10進数 -> 16進数
 unsigned int Dec_fromhex(std::string &hex); // 16進数 -> 10進数
 std::string Hex_frombin(std::string &bin); // 2進数 -> 16進数
 std::string  Bin_fromhex(std::string &hex); // 16進数 -> 2進数
+
+#endif
