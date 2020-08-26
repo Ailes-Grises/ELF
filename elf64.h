@@ -13,6 +13,7 @@
 #include<elf.h>
 #include"device.h"
 
+// ELF ヘッダの解析
 class Elf{
 	private:
 	Elf64_Ehdr ehdr;
@@ -40,6 +41,7 @@ class Elf{
 	void show_ehdr(void);
 };
 
+// Section ヘッダの解析
 class Section{
 	private:
 	Elf64_Shdr *shdr; // ポインタ表記にしておいて，コンストラクタでsizeof(Elf64_Shdr)*e_shnum だけ領域確保する．
@@ -49,6 +51,8 @@ class Section{
 	public:
 	Section(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh); // 動的領域確保
 	~Section(void);
+
+	// 各構造体メンバの読み出し関数
 	uint32_t Sh_name(int seq);
 	uint32_t Sh_type(int seq);
 	uint64_t Sh_flags(int seq);
@@ -66,6 +70,7 @@ class Section{
 	void show_shdr(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh);
 };
 
+// Program ヘッダの解析
 class Program{
 	private:
 	Elf64_Phdr *phdr;
@@ -76,6 +81,7 @@ class Program{
 	void show_phdr(std::shared_ptr<Device> bd, std::shared_ptr<Elf> eh);
 };
 
+// ターゲットとなるある一つのセクションに格納されているシンボルに関する情報を解析するクラス
 class Symbol{
 	private:
 	Elf64_Sym *symbol; // シンボルテーブル(構造体)を格納する配列．
@@ -87,17 +93,40 @@ class Symbol{
 	public:
 	Symbol(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh, std::string symtab_name);
 	~Symbol(void);
+
+	// 各構造体メンバの読み出し関数
 	uint32_t St_name(int seq);
 	unsigned char St_info(int seq);
 	unsigned char St_other(int seq);
 	uint16_t St_shndx(int seq);
 	Elf64_Addr St_value(int seq);
 	uint64_t St_size(int seq);
+
 	int Symbol_hash(std::string key); // ハッシュ関数．
 
 	void sym_parser(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh);
 	void getsym_name(std::shared_ptr<Device> bd, int addr, int sec_num); // シンボルの名前を読み出してstd::string st_name を初期化する関数．
 	void show_symtab(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh);
+};
+
+// ダイナミックリンクの解析
+class Dynamic{
+	private:
+	Elf64_Dyn *dynamic; // 構造体型の配列 (自作の_DYNAMIC[] の実装)
+	unsigned int dynamic_num; // 構造体の個数
+	unsigned int dynamic_seq; // .dynamic セクションのシーケンス番号
+	public:
+	Dynamic(void);
+	Dynamic(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh);
+	~Dynamic(void);
+
+	// 各構造体メンバの読み出し関数
+	int64_t D_tag(unsigned int seq);
+	uint64_t D_val(unsigned int seq); // union メンバなので気をつけて運用すること．
+	uint64_t D_ptr(unsigned int seq);
+
+	void dyn_parser(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh);
+	void show_dynamic(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh);
 };
 
 #endif

@@ -5,10 +5,10 @@
 #include"elf64.h"
 
 Symbol::Symbol(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh, std::string symtab_name){
-	Symbol::symtab_name=symtab_name;
+	this->symtab_name=symtab_name;
 	// sym_type の値によって確保する領域サイズを変更する．
 	int seq=sh->Section_hash(symtab_name); // シーケンス番号取得
-	Symbol::symbol_num=sh->Sh_size(seq)/sh->Sh_entsize(seq);
+	this->symbol_num=sh->Sh_size(seq)/sh->Sh_entsize(seq);
 	symbol = new Elf64_Sym[Symbol::symbol_num];
 	st_name = new std::string[Symbol::symbol_num];
 	for(int i=0;i<Symbol::symbol_num;i++) memset(&symbol[i], 0, sizeof(symbol[i]));
@@ -47,9 +47,6 @@ uint64_t Symbol::St_size(int seq){
 int Symbol::Symbol_hash(std::string key){
 	return symbol_hash[key];
 };
-
-
-
 
 
 void Symbol::getsym_name(std::shared_ptr<Device> bd, int addr, int seq){
