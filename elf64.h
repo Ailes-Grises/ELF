@@ -129,4 +129,7 @@ class Dynamic{
 	void show_dynamic(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh);
 };
 
+// .text セクションの機械語コードを解析する関数
+void asm_dumper(std::shared_ptr<Device> bd, std::shared_ptr<Section> sh);
+
 #endif

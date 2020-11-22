@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
 	}
 
 	int opt;
-	while((opt=getopt(argc, argv, "hlSsd"))!=-1){
+	while((opt=getopt(argc, argv, "hlSsdz"))!=-1){
 		switch(opt){
 			case 'h':
 				Ehdr->show_ehdr(); break;
@@ -35,6 +35,8 @@ int main(int argc, char *argv[]){
 				break;
 			case 'd':
 				dynamic->show_dynamic(bd, Shdr); break;
+			case 'z':
+				asm_dumper(bd, Shdr); break;
 
 			default:
 				std::cerr<<"Please type option: \n"<<std::endl;
